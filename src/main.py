@@ -67,7 +67,7 @@ def send_location():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=send_location(), trigger='interval', seconds=1)
+scheduler.add_job(func=send_location, trigger='interval', seconds=1)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
