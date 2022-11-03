@@ -47,13 +47,13 @@ def send_location():
     # Получение данных от дрона
     position = copter.get_gps_data()
 
-    id = position['id']  # TODO сделать нормальное получение id дрона
-    lat = position['lat']
-    lon = position['lon']
-    vel = position['vel']
+    #id = position['id']  # TODO сделать нормальное получение id дрона
+    #lat = position['lat']
+    #lon = position['lon']
+    #vel = position['vel']
     # TODO тут напиши строчки с получением локации в две переменные
     try:
-        r = requests.post('http://10.11.12.87:5000/map/system-json/add-drone-info', json=position)
+        r = requests.post('http://192.168.1.184:5000/torpedo/system-json/add-location-history-info', data=position)
         if r.status_code == 200:
             logging.log(f'[send_location][{datetime.now()}] Successfully sent location')
         else:
@@ -98,4 +98,5 @@ def post_flight_task():
 # -----------------------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+#    app.run(host='0.0.0.0', port=5000)
+	send_location()
