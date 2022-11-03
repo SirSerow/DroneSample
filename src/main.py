@@ -2,7 +2,7 @@ import atexit
 import logging
 import traceback
 from datetime import datetime
-import drone
+from drone import Drone
 
 import requests
 from flask import Flask, request
@@ -11,17 +11,20 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
+# Создание объекта класса Drone
+copter = Drone('drone', 'DEBUG', 1)
+
 # -----------------------------------------------------------------------------------------------------------------------
 # Блок функций:
 
-def set_flight_task(lat, lon):
+def set_flight_task():
     """
     Устанавливает полётное задание в контроллер.
     :return:
     Возвращает True в случае успешного прохождения операции, иначе возвращает False)
     """
     try:
-        print('f1') # TODO написать задание полётного задания
+        return copter.navigate_to_target()
     except:
         logging.error(traceback.format_exc())
         logging.error(f'[set_flight_task]: {datetime.now()} Error setting flight task!')
@@ -41,11 +44,13 @@ def send_location():
     :return:
     Возвращает id дрона, его координаты и скорость
     """
+    # Получение данных от дрона
+    position = copter.get_gps_data()
 
-    id = 1  # TODO сделать нормальное получение id дрона
-    lat = 0
-    lon = 0
-    vel = 0
+    id = position['id']  # TODO сделать нормальное получение id дрона
+    lat = position['lat']
+    lon = position['lon']
+    vel = position['vel']
     # TODO тут напиши строчки с получением локации в две переменные
     try:
         r = requests.post('10.11.12.87:5000/map/system-json/add-drone-info', json={"id": id,
@@ -84,8 +89,8 @@ def post_flight_task():
     task = request.get_json()
     target_lat = task['lat']
     target_lon = task['lon']
-
-    flight_set = set_flight_task(target_lat, target_lon)
+    copter.get_mission_target(task)
+    flight_set = set_flight_task()
     if(flight_set):
         return "Success setting flight task", 200
     else:

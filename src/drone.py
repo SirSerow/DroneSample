@@ -30,37 +30,27 @@ class Drone:
         '''
         Функция с примером полёта
         '''
-        # Takeoff and hover 1 m above the ground
+        # Подняться на 1 метр
         self.navigate(x=0, y=0, z=1, frame_id='body', auto_arm=True)
-
-        # Wait for 3 seconds
+        # Подождать три секунды
         rospy.sleep(3)
-
-        # Fly forward 2 m
+        # Пролететь на два метра вперёд
         self.navigate(x=2, y=0, z=0, frame_id='body')
-
-        # Wait for 3 seconds
+        # Подождать три секунды
         rospy.sleep(3)
-
-        # Fly forward 2 m
+        # Пролететь на два метра вправо
         self.navigate(x=0, y=2, z=0, frame_id='body')
-
-        # Wait for 3 seconds
+        # Подождать три секунды
         rospy.sleep(3)
-
-        # Fly forward 2 m
+        # Пролететь на два метра назад
         self.navigate(x=-2, y=0, z=0, frame_id='body')
-
-        # Wait for 3 seconds
+        # WПодождать три секунды
         rospy.sleep(3)
-
-        # Fly forward 2 m
+        # Пролететь на два метра влево
         self.navigate(x=0, y=-2, z=0, frame_id='body')
-
-        # Wait for 3 seconds
+        # подождать три секунды
         rospy.sleep(3)
-
-        # Perform landing
+        # Приземлиться
         self.land()
 
     def get_gps_data(self):
@@ -107,6 +97,38 @@ class Drone:
             processing_result = 'FAILED TO PROCESS TASK'    
         
         return self.drone_id, processing_result
+
+    def navigate_to_target(self, safety_flag):
+        '''
+        Функция полёта к цели в координатах gps
+        :return:
+        Возвращает True в случае успешного прохождения 
+        операции, иначе возвращает False
+        '''
+        if safety_flag == 1:
+            #Получить стартовые координаты
+            start = self.get_telemetry()
+            #Проверить, что координаты получены
+            if math.isnan(start.lat):
+                raise Exception('No global position, install and configure GPS sensor')
+                return False
+            logging.info(f'[navigate_to_target]: {datetime.now()} Start point global position: lat={start.lat}, lon={start.lon}')
+            #Подняться на три метра
+            self.navigate(x=0, y=0, z=3, frame_id='body', auto_arm=True)
+            #Подождать 3 секунды
+            rospy.sleep(3)
+            #Переместиться к координатам цели
+            self.navigate_global(lat=self.target['lat'], lon=self.target['lon'], z=start.z+3, yaw=math.inf, speed=1)
+            #Подождать, пока дрон долетит до цели
+            while not rospy.is_shutdown():
+                telem = self.get_telemetry(frame_id='navigate_target')
+                if math.sqrt(telem.x ** 2 + telem.y ** 2 + telem.z ** 2) < 0.2:
+                    break
+                rospy.sleep(0.2)
+            #Приземлиться
+            self.land()
+            return True
+
 
 if __name__ == '__main__':
     test = Drone('drone', 'DEBUG', 1)
