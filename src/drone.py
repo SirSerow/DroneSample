@@ -66,14 +66,13 @@ class Drone:
             logging.error(f'[set_flight_task]: {datetime.now()} Flight controller is not available')
         else:
             data = {
-                'id': 1,
-                'lat': self.get_telemetry().lat,
-                'lon': self.get_telemetry().lat,
-                'vel': math.sqrt(
-                        pow(self.get_telemetry().vx, 2) +
-                        pow(self.get_telemetry().vy, 2) + 
-                        pow(self.get_telemetry().vz, 2)
-                        )
+                'id_drone': '1',
+                'current_height': f'{self.get_telemetry().alt}',
+                'current_latitude': f'{self.get_telemetry().lat}',
+                'current_longitude': f'{self.get_telemetry().lon}',
+                'current_time': f'{datetime.datetime.now().replace(microsecond=0)}',
+                'current_speed': f'{math.sqrt(pow(self.get_telemetry().vx, 2) + pow(self.get_telemetry().vy, 2) + pow(self.get_telemetry().vz, 2))}',
+                'battery': f'{self.get_telemetry().cell_voltage}'  
             }
             return data 
 

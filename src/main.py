@@ -53,10 +53,7 @@ def send_location():
     vel = position['vel']
     # TODO тут напиши строчки с получением локации в две переменные
     try:
-        r = requests.post('10.11.12.87:5000/map/system-json/add-drone-info', json={"id": id,
-                                                                                "lat": lat,
-                                                                                "lon": lon,
-                                                                                "vel": vel})
+        r = requests.post('http://10.11.12.87:5000/map/system-json/add-drone-info', json=position)
         if r.status_code == 200:
             logging.log(f'[send_location][{datetime.now()}] Successfully sent location')
         else:
